@@ -1,0 +1,11 @@
+.imatic-autocomplete {
+  list-style: none;
+  border: 1px solid;
+  margin: 0;
+  background-color: #fff;
+}.imatic-autocomplete li {
+  padding: 0 1em;
+}.imatic-autocomplete li:focus {
+  background-color: #5090c1;
+  color: #fff;
+}
