@@ -7,7 +7,7 @@ require_api('authentication_api.php');
 require_api('helper_api.php');
 require_api('project_api.php');
 
-access_ensure_project_level(config_get('kanban_view_threshold'));
+access_ensure_project_level(config_get('view_bug_threshold'));
 
 function imatic_autocomplete_send_json($status, $data) {
 	header('Content-Type: application/json');
