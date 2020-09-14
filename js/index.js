@@ -208,7 +208,7 @@ function autocomplete(el) {
                 })
                     .then(res => res.json())
                     .then(completions => {
-                        if (completions.length === 0) {
+                        if (completions.length === 0 || !autocompleting) {
                             return;
                         }
 
