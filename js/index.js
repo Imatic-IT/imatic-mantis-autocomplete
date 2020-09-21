@@ -2,10 +2,27 @@ import * as u from './utils';
 import * as cache from './cache';
 
 let resultCache = cache.create();
-let controller;
 const _autocompleteUrl = autocompleteUrl();
 const max_len = 191;
 let destroyListFn;
+
+function flatArraysEqual(v1, v2) {
+    if (v1 == null || v2 == null) {
+        return v1 == null && v2 == null;
+    }
+
+    if (v1.length !== v2.length) {
+        return false;
+    }
+
+    for (let i = 0; i < v1.length; i++) {
+        if (v1[i] !== v2[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 function openAutocompleteListEl({
     completions,
@@ -141,6 +158,7 @@ function focusAutocompleteList() {
 function autocomplete(el) {
     let autocompleting = false;
     let startSel = 0;
+    let activeCompletions = null;
 
     function stopAutocomplete() {
         if (!autocompleting) {
@@ -151,104 +169,113 @@ function autocomplete(el) {
         closeAutocompleteListEl();
     }
 
+    function getSelectionLength() {
+        return el.selectionStart - startSel;
+    }
+
+    function getSelection() {
+        const len = getSelectionLength();
+        const selection = el.value.substr(startSel, len);
+
+        if (selection.length === 0 || selection.match(/[\n ]/) != null) {
+            return null;
+        }
+
+        return selection;
+    }
+
     const handleChange = () => {
         if (el.selectionStart === 0) {
             stopAutocomplete();
             return;
         }
 
-        if (autocompleting) {
-            const len = el.selectionStart - startSel;
-            if (len < 0 || len > max_len) {
-                stopAutocomplete();
-                return;
-            }
-
-            if (el.value[el.selectionStart - 1] === '@') {
-                autocompleting = true;
-                startSel = el.selectionStart;
-                return;
-            }
-
-            const v = el.value.substr(startSel, len);
-            if (v.match(/[\n ]/) != null) {
-                stopAutocomplete();
-                return;
-            }
-
-            if (v.length > 0) {
-                if (controller) {
-                    controller.abort();
-                }
-
-                controller = new AbortController();
-                closeAutocompleteListEl();
-
-                const receiveCompletions = (completions) => {
-                    if (completions.length === 0 || !autocompleting) {
-                        return;
-                    }
-
-                    openAutocompleteListEl({
-                        completions: completions,
-                        input: el,
-                        focusInput: () => {
-                            const requiredSel = startSel + len;
-                            el.focus();
-                            el.setSelectionRange(requiredSel, requiredSel);
-                        },
-                        onSelect: ({val}) => {
-                            if (!autocompleting) {
-                                return;
-                            }
-
-                            const requiredSel = startSel + len;
-                            el.focus();
-                            el.setRangeText(
-                                val.substr(len),
-                                requiredSel,
-                                requiredSel,
-                                'end'
-                            );
-                        },
-                        onRestyle: (listEl) => {
-                            const listPos = el.getBoundingClientRect();
-                            const elStyles = getComputedStyle(el);
-
-                            const textHeight = u.textSize(
-                                elStyles,
-                                el.value.substr(0, el.selectionStart)
-                            ).height;
-
-                            listEl.style.position = 'fixed';
-                            listEl.style.left = Math.max(0, listPos.x) + 'px';
-                            listEl.style.top =
-                                listPos.y +
-                                textHeight +
-                                5 -
-                                el.scrollTop +
-                                'px';
-                            listEl.style.width = el.clientWidth + 'px';
-                        },
-                    });
-                };
-
-                if (cache.has(resultCache, v)) {
-                    return receiveCompletions(cache.get(resultCache, v));
-                }
-
-                fetch(searchUrl(v), {
-                    signal: controller.signal,
-                })
-                    .then((res) => res.json())
-                    .then((completions) => {
-                        resultCache = cache.set(resultCache, v, completions);
-                        receiveCompletions(completions);
-                    });
-            }
-        } else if (el.value[el.selectionStart - 1] === '@') {
+        if (el.value[el.selectionStart - 1] === '@') {
             autocompleting = true;
             startSel = el.selectionStart;
+            activeCompletions = null;
+            return;
+        }
+
+        if (autocompleting) {
+            const v = getSelection();
+            if (v == null) {
+                stopAutocomplete();
+                return;
+            }
+
+            const receiveCompletions = () => {
+                const completions = cache.getBestMatch(
+                    resultCache,
+                    getSelection()
+                );
+                if (
+                    completions == null ||
+                    completions.length === 0 ||
+                    !autocompleting
+                ) {
+                    closeAutocompleteListEl();
+                    activeCompletions = null;
+                    return;
+                }
+
+                if (flatArraysEqual(activeCompletions, completions)) {
+                    return;
+                }
+
+                const len = getSelectionLength();
+                activeCompletions = completions;
+
+                openAutocompleteListEl({
+                    completions: completions,
+                    input: el,
+                    focusInput: () => {
+                        const requiredSel = startSel + len;
+                        el.focus();
+                        el.setSelectionRange(requiredSel, requiredSel);
+                    },
+                    onSelect: ({val}) => {
+                        if (!autocompleting) {
+                            return;
+                        }
+
+                        const requiredSel = startSel + len;
+                        el.focus();
+                        el.setRangeText(
+                            val.substr(len),
+                            requiredSel,
+                            requiredSel,
+                            'end'
+                        );
+                    },
+                    onRestyle: (listEl) => {
+                        const listPos = el.getBoundingClientRect();
+                        const elStyles = getComputedStyle(el);
+
+                        const textHeight = u.textSize(
+                            elStyles,
+                            el.value.substr(0, el.selectionStart)
+                        ).height;
+
+                        listEl.style.position = 'fixed';
+                        listEl.style.left = Math.max(0, listPos.x) + 'px';
+                        listEl.style.top =
+                            listPos.y + textHeight + 5 - el.scrollTop + 'px';
+                        listEl.style.width = el.clientWidth + 'px';
+                    },
+                });
+            };
+
+            if (cache.has(resultCache, v)) {
+                return receiveCompletions(cache.get(resultCache, v));
+            }
+
+            fetch(searchUrl(v))
+                .then((res) => res.json())
+                .then((completions) => {
+                    resultCache = cache.set(resultCache, v, completions);
+                    receiveCompletions();
+                });
         }
     };
 
