@@ -119,9 +119,12 @@ function openAutocompleteListEl({
 
     const scContainer = input.closest('.table-responsive');
 
-    window.addEventListener('touchend', restyle);
-    input.addEventListener('touchend', restyle);
+    var textArea = document.getElementById('bugnote_text')
 
+    textArea.addEventListener('input', restyle);
+    textArea.addEventListener('click', restyle);
+    textArea.addEventListener('resize', restyle);
+    
     window.addEventListener('scroll', restyle);
     window.addEventListener('resize', restyle);
     input.addEventListener('scroll', restyle);
@@ -132,7 +135,10 @@ function openAutocompleteListEl({
     window.addEventListener('focusin', closeIfOutsideTarget);
 
     destroyListFn = () => {
-        window.removeEventListener('touchend', restyle);
+        
+        textArea.addEventListener('input', restyle);
+        textArea.addEventListener('click', restyle);
+        textArea.addEventListener('resize', restyle);
 
         window.removeEventListener('scroll', restyle);
         window.removeEventListener('resize', restyle);
