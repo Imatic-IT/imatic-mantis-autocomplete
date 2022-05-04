@@ -273,12 +273,21 @@ function autocomplete(el) {
                             elStyles,
                             el.value.substr(0, el.selectionStart)
                         ).height;
-
+                        
                         listEl.style.position = 'fixed';
                         listEl.style.left = Math.max(0, listPos.x) + 'px';
                         listEl.style.top =
                          listPos.y + textHeight + 5 - el.scrollTop + 'px';
                         listEl.style.width = el.clientWidth + 'px';
+
+                        const liPos = document.getElementById('imaticAutocompleteWidget').getBoundingClientRect();
+                        const posDif = listPos.y - liPos.y  
+                        const n = -20
+
+                        if (posDif > n ) {
+                            listEl.style.top =
+                            listPos.y + textHeight + 5 - el.scrollTop + posDif + 'px';
+                        }
                     },
                 });
             };
