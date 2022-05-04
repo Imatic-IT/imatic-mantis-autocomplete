@@ -93,6 +93,12 @@ function openAutocompleteListEl({
         }
     });
 
+    ul.addEventListener('click', (e) => {
+        var text = $(e.target).text();
+        onSelect({val: text});
+        closeAutocompleteListEl();
+    })
+
     ul.addEventListener('focus', (e) => {
         const firstLi = ul.querySelector('li');
         focused = 0;
@@ -113,6 +119,9 @@ function openAutocompleteListEl({
 
     const scContainer = input.closest('.table-responsive');
 
+    window.addEventListener('touchend', restyle);
+    input.addEventListener('touchend', restyle);
+
     window.addEventListener('scroll', restyle);
     window.addEventListener('resize', restyle);
     input.addEventListener('scroll', restyle);
@@ -123,6 +132,8 @@ function openAutocompleteListEl({
     window.addEventListener('focusin', closeIfOutsideTarget);
 
     destroyListFn = () => {
+        window.removeEventListener('touchend', restyle);
+
         window.removeEventListener('scroll', restyle);
         window.removeEventListener('resize', restyle);
         input.removeEventListener('scroll', restyle);
@@ -260,7 +271,7 @@ function autocomplete(el) {
                         listEl.style.position = 'fixed';
                         listEl.style.left = Math.max(0, listPos.x) + 'px';
                         listEl.style.top =
-                            listPos.y + textHeight + 5 - el.scrollTop + 'px';
+                         listPos.y + textHeight + 5 - el.scrollTop + 'px';
                         listEl.style.width = el.clientWidth + 'px';
                     },
                 });
@@ -306,6 +317,17 @@ function autocomplete(el) {
         handleChange();
     });
 }
+
+
+function getOffset(el) {
+    const rect = el.getBoundingClientRect();
+
+    return rect.top + window.scrollY
+    return {
+      left: rect.left + window.scrollX,
+      top: rect.top + window.scrollY
+    };
+  }
 
 function autocompleteUrl() {
     const el = document.querySelector('[data-imatic-autocomplete-url]');
