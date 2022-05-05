@@ -268,7 +268,7 @@ function autocomplete(el) {
                     onRestyle: (listEl) => {
                         const listPos = el.getBoundingClientRect();
                         const elStyles = getComputedStyle(el);
-                        let listPosLi = document.getElementById('imaticAutocompleteWidget')
+                        let widgetId = document.getElementById('imaticAutocompleteWidget')
 
                         const textHeight = u.textSize(
                             elStyles,
@@ -281,14 +281,13 @@ function autocomplete(el) {
                          listPos.y + textHeight + 5 - el.scrollTop + 'px';
                         listEl.style.width = el.clientWidth + 'px';
 
-                        if (listPosLi) {
-
-                            const liPos = document.getElementById('imaticAutocompleteWidget').getBoundingClientRect();
-                            const posDif = listPos.y - liPos.y  
-                            const n = -20
-
-                            if (posDif > n ) {
-                                listEl.style.top = listPos.y + textHeight + 30 - el.scrollTop + posDif + 'px';
+                        if (widgetId) {
+                            if (textHeight) {
+                                const widgetPosition = widgetId.getBoundingClientRect();
+                                const posDif = listPos.y - widgetPosition.y + textHeight
+                                if (posDif > -5 ) {
+                                    listEl.style.top = listPos.y + textHeight + 10 - el.scrollTop + posDif + 'px';
+                                }
                             }
                         }
                     },
