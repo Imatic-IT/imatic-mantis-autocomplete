@@ -136,9 +136,9 @@ function openAutocompleteListEl({
 
     destroyListFn = () => {
         
-        textArea.addEventListener('input', restyle);
-        textArea.addEventListener('click', restyle);
-        textArea.addEventListener('resize', restyle);
+        textArea.removeEventListener('input', restyle);
+        textArea.removeEventListener('click', restyle);
+        textArea.removeEventListener('resize', restyle);
 
         window.removeEventListener('scroll', restyle);
         window.removeEventListener('resize', restyle);
@@ -334,17 +334,6 @@ function autocomplete(el) {
         handleChange();
     });
 }
-
-
-function getOffset(el) {
-    const rect = el.getBoundingClientRect();
-
-    return rect.top + window.scrollY
-    return {
-      left: rect.left + window.scrollX,
-      top: rect.top + window.scrollY
-    };
-  }
 
 function autocompleteUrl() {
     const el = document.querySelector('[data-imatic-autocomplete-url]');
