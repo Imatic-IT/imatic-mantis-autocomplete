@@ -93,6 +93,12 @@ function openAutocompleteListEl({
         }
     });
 
+    ul.addEventListener('click', (e) => {
+        var text = $(e.target).text();
+        onSelect({val: text});
+        closeAutocompleteListEl();
+    })
+
     ul.addEventListener('focus', (e) => {
         const firstLi = ul.querySelector('li');
         focused = 0;
@@ -113,6 +119,12 @@ function openAutocompleteListEl({
 
     const scContainer = input.closest('.table-responsive');
 
+    var textArea = document.getElementById('bugnote_text')
+
+    textArea.addEventListener('input', restyle);
+    textArea.addEventListener('click', restyle);
+    textArea.addEventListener('resize', restyle);
+    
     window.addEventListener('scroll', restyle);
     window.addEventListener('resize', restyle);
     input.addEventListener('scroll', restyle);
@@ -123,6 +135,11 @@ function openAutocompleteListEl({
     window.addEventListener('focusin', closeIfOutsideTarget);
 
     destroyListFn = () => {
+        
+        textArea.removeEventListener('input', restyle);
+        textArea.removeEventListener('click', restyle);
+        textArea.removeEventListener('resize', restyle);
+
         window.removeEventListener('scroll', restyle);
         window.removeEventListener('resize', restyle);
         input.removeEventListener('scroll', restyle);
@@ -251,17 +268,28 @@ function autocomplete(el) {
                     onRestyle: (listEl) => {
                         const listPos = el.getBoundingClientRect();
                         const elStyles = getComputedStyle(el);
+                        let widgetId = document.getElementById('imaticAutocompleteWidget')
 
                         const textHeight = u.textSize(
                             elStyles,
                             el.value.substr(0, el.selectionStart)
                         ).height;
-
+                        
                         listEl.style.position = 'fixed';
                         listEl.style.left = Math.max(0, listPos.x) + 'px';
                         listEl.style.top =
-                            listPos.y + textHeight + 5 - el.scrollTop + 'px';
+                         listPos.y + textHeight + 5 - el.scrollTop + 'px';
                         listEl.style.width = el.clientWidth + 'px';
+
+                        if (widgetId) {
+                            if (textHeight) {
+                                const widgetPosition = widgetId.getBoundingClientRect();
+                                const posDif = listPos.y - widgetPosition.y + textHeight
+                                if (posDif > -5 ) {
+                                    listEl.style.top = listPos.y + textHeight + 10 - el.scrollTop + posDif + 'px';
+                                }
+                            }
+                        }
                     },
                 });
             };
