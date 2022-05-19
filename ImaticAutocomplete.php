@@ -6,7 +6,7 @@ class ImaticAutocompletePlugin extends MantisPlugin {
 	{
 		$this->name = 'Imatic autocomplete';
 		$this->description = 'Autocomplete';
-		$this->page = 'config';
+		$this->page = '';
 		$this->version = '0.0.3';
 		$this->requires = [
 			'MantisCore' => '2.0.0',
