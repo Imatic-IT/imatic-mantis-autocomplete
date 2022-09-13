@@ -270,12 +270,22 @@ function autocomplete(el) {
                 return receiveCompletions(cache.get(resultCache, v));
             }
 
-            fetch(searchUrl(v))
+            // Get issue id from url 
+            const urlParams = new URLSearchParams(window.location.search)
+            const issue_id = urlParams.get('id')
+            const formData = new FormData()
+            formData.append('issue_id', issue_id)
+
+            
+            fetch(searchUrl(v), {
+                    method: 'POST',
+                    body: formData
+                })
                 .then((res) => res.json())
                 .then((completions) => {
                     resultCache = cache.set(resultCache, v, completions);
                     receiveCompletions();
-                });
+                })
         }
     };
 
@@ -309,6 +319,22 @@ function autocomplete(el) {
 
 function autocompleteUrl() {
     const el = document.querySelector('[data-imatic-autocomplete-url]');
+    if (el === null) {
+        return null;
+    }
+
+    return el.dataset.imaticAutocompleteUrl;
+}
+
+function autocompleteUrlSetProject() {
+    const el = document.querySelector('[data-imatic-autocomplete-url-set-project]');
+
+    const url =    new URL(el.dataset.imaticAutocompleteUrlSetProject, location.href);
+
+    return     new URL(el.dataset.imaticAutocompleteUrlSetProject, location.href);
+    // return el.dataset.imaticAutocompleteUrlSetProject
+
+    return el
     if (el === null) {
         return null;
     }

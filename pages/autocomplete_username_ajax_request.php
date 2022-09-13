@@ -20,9 +20,16 @@ function imatic_autocomplete_send_json($status, $data) {
  */
 function imatic_autocomplete_users() {
 	$t_current_user = auth_get_current_user_id();
-	$p_project_id = helper_get_current_project();
 	$p_access = config_get('handle_bug_threshold');
 
+	if (isset($_POST['issue_id'])) {
+		$issue_id = $_POST['issue_id'];
+		$bug = bug_get_row($issue_id);
+		$p_project_id = $bug['project_id'] ;
+		helper_set_current_project( $p_project_id );
+
+	}
+	
 	if( $p_project_id === ALL_PROJECTS ) {
 		$t_projects = user_get_accessible_projects( $t_current_user );
 
