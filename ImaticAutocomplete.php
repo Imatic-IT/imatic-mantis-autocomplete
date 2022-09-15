@@ -21,7 +21,14 @@ class ImaticAutocompletePlugin extends MantisPlugin {
 	{
 		return [
 			'EVENT_LAYOUT_BODY_END' => 'layout_body_end_hook',
+			'EVENT_UPDATE_BUG_STATUS_FORM' => 'add_issue_id',
+			'EVENT_VIEW_BUG_DETAILS' => 'add_issue_id',
 		];
+	}
+
+	public function add_issue_id(){
+		$f_bug_id = gpc_get_int( 'id' );
+		echo '<input  style="display:none" id="issue_id" value='.$f_bug_id.' />';
 	}
 
 	public function layout_body_end_hook()

@@ -270,13 +270,10 @@ function autocomplete(el) {
                 return receiveCompletions(cache.get(resultCache, v));
             }
 
-            // Get issue id from url 
-            const urlParams = new URLSearchParams(window.location.search)
-            const issue_id = urlParams.get('id')
+            const issue_id = document.getElementById('issue_id').value
             const formData = new FormData()
             formData.append('issue_id', issue_id)
 
-            
             fetch(searchUrl(v), {
                     method: 'POST',
                     body: formData
