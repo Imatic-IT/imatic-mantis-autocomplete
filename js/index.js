@@ -270,9 +270,9 @@ function autocomplete(el) {
                 return receiveCompletions(cache.get(resultCache, v));
             }
 
-            const issue_id = document.getElementById('issue_id').value
+            const project_id = document.getElementById('project_id').value
             const formData = new FormData()
-            formData.append('issue_id', issue_id)
+            formData.append('project_id', project_id)
 
             fetch(searchUrl(v), {
                     method: 'POST',

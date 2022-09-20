@@ -28,7 +28,9 @@ class ImaticAutocompletePlugin extends MantisPlugin {
 
 	public function add_issue_id(){
 		$f_bug_id = gpc_get_int( 'id' );
-		echo '<input  style="display:none" id="issue_id" value='.$f_bug_id.' />';
+		$bug = bug_get_row($f_bug_id);
+		$p_project_id = $bug['project_id'] ;
+		echo '<input  style="display:none" id="project_id" value='.$p_project_id.' />';
 	}
 
 	public function layout_body_end_hook()
