@@ -220,8 +220,6 @@ function autocomplete(el) {
                     return;
                 }
 
-                // tu resultCache zrejme getne vytovri userov
-                //tu get tu ich completions
                 const len = getSelectionLength();
                 activeCompletions = completions;
 
