@@ -7,7 +7,7 @@ class ImaticAutocompletePlugin extends MantisPlugin {
 		$this->name = 'Imatic autocomplete';
 		$this->description = 'Autocomplete';
 		$this->page = 'config';
-		$this->version = '0.0.3';
+		$this->version = '0.0.4';
 		$this->requires = [
 			'MantisCore' => '2.0.0',
 		];
@@ -27,6 +27,6 @@ class ImaticAutocompletePlugin extends MantisPlugin {
 	public function layout_body_end_hook()
 	{
 		return '<link rel="stylesheet" type="text/css" href="' . plugin_file('styles.css') . '&v=' . $this->version . '" />'
-			.'<script data-imatic-autocomplete-url="' . htmlspecialchars(plugin_page('autocomplete_username_ajax_request')) . '" src="' . plugin_file( 'autocomplete.js' ) . '&v=' . $this->version . '"></script>';
+			.'<script  src="' . plugin_file( 'autocomplete.js' ) . '&v=' . $this->version . '"></script>';
 	}
 }

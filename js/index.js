@@ -2,7 +2,6 @@ import * as u from './utils';
 import * as cache from './cache';
 
 let resultCache = cache.create();
-const _autocompleteUrl = autocompleteUrl();
 const max_len = 191;
 let destroyListFn;
 
@@ -25,12 +24,12 @@ function flatArraysEqual(v1, v2) {
 }
 
 function openAutocompleteListEl({
-    completions,
-    onSelect,
-    focusInput,
-    onRestyle,
-    input,
-}) {
+                                    completions,
+                                    onSelect,
+                                    focusInput,
+                                    onRestyle,
+                                    input,
+                                }) {
     closeAutocompleteListEl();
 
     let focused = 0;
@@ -71,24 +70,22 @@ function openAutocompleteListEl({
                 }
                 break;
             }
-            case 'ArrowDown':
-                {
-                    const newActive = ul.querySelector(
-                        `li:nth-child(${focused + 2})`
-                    );
-                    if (newActive) {
-                        focused++;
-                        newActive.focus();
-                    }
+            case 'ArrowDown': {
+                const newActive = ul.querySelector(
+                    `li:nth-child(${focused + 2})`
+                );
+                if (newActive) {
+                    focused++;
+                    newActive.focus();
                 }
+            }
                 break;
-            case 'Enter':
-                {
-                    if (onSelect) {
-                        onSelect({val: completions[focused]});
-                    }
-                    closeAutocompleteListEl();
+            case 'Enter': {
+                if (onSelect) {
+                    onSelect({val: completions[focused]});
                 }
+                closeAutocompleteListEl();
+            }
                 break;
         }
     });
@@ -223,6 +220,8 @@ function autocomplete(el) {
                     return;
                 }
 
+                // tu resultCache zrejme getne vytovri userov
+                //tu get tu ich completions
                 const len = getSelectionLength();
                 activeCompletions = completions;
 
@@ -270,12 +269,31 @@ function autocomplete(el) {
                 return receiveCompletions(cache.get(resultCache, v));
             }
 
-            fetch(searchUrl(v))
-                .then((res) => res.json())
-                .then((completions) => {
-                    resultCache = cache.set(resultCache, v, completions);
-                    receiveCompletions();
+            let handlersSelect = document.querySelectorAll('select[name="handler_id"]');
+            let completions = [];
+
+            for (let i = 0; i < handlersSelect.length; i++) {
+                let options = handlersSelect[i].options;
+                for (let j = 0; j < options.length; j++) {
+                    completions.push(options[j].textContent);
+                }
+            }
+
+            completions = completions.filter(function (handler) {
+                return handler !== "[Myself]" && handler !== "[Reporter]";
+            });
+
+            filterUsersByString(v, completions)
+
+
+            function filterUsersByString(v, users) {
+                let filteredUsers = users.filter(function (user) {
+                    return user.includes(v);
                 });
+
+                resultCache = cache.set(resultCache, v, filteredUsers);
+                receiveCompletions();
+            }
         }
     };
 
@@ -307,28 +325,11 @@ function autocomplete(el) {
     });
 }
 
-function autocompleteUrl() {
-    const el = document.querySelector('[data-imatic-autocomplete-url]');
-    if (el === null) {
-        return null;
-    }
 
-    return el.dataset.imaticAutocompleteUrl;
-}
-
-function searchUrl(s) {
-    const url = new URL(_autocompleteUrl, location.href);
-    url.searchParams.append('search', s);
-
-    return url;
-}
-
-if (_autocompleteUrl != null) {
-    document
-        .querySelectorAll(
-            '#bugnote_text, #description, #steps_to_reproduce, #additional_info, #summary, #additional_information'
-        )
-        .forEach((el) => {
-            autocomplete(el);
-        });
-}
+document
+    .querySelectorAll(
+        '#bugnote_text, #description, #steps_to_reproduce, #additional_info, #summary, #additional_information'
+    )
+    .forEach((el) => {
+        autocomplete(el);
+    });
