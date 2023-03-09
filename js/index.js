@@ -242,7 +242,7 @@ function autocomplete(el) {
 
                         const requiredSel = startSel + len;
                         const replaceTo = startSel + getSelection().length;
-
+                        
                         el.focus();
                         el.setRangeText(
                             val.substr(len)+ ' ', // ' ' whitespace after inserted @user
@@ -291,8 +291,12 @@ function autocomplete(el) {
 
 
             function filterUsersByString(v, users) {
+
                 let filteredUsers = users.filter(function (user) {
-                    return user.includes(v);
+
+                    if (user.replace(/.*\s/, "").indexOf(v) === 0) {
+                        return user.includes(v);
+                      }
                 });
 
                 resultCache = cache.set(resultCache, v, filteredUsers);
