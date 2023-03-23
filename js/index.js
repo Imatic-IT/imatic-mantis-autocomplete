@@ -109,6 +109,8 @@ function openAutocompleteListEl({
 
     ul.addEventListener('click', (e) => {
         var text = $(e.target).text();
+        // Remove role icon
+        text = text.replace(/.*\s/, "");
         onSelect({val: text});
         closeAutocompleteListEl();
     })
