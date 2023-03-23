@@ -50,7 +50,7 @@ function openAutocompleteListEl({
     ul.setAttribute('tabindex', -1);
     completionEls.forEach((el) => ul.appendChild(el));
 
-    const controlKeys = new Set(['ArrowDown', 'ArrowUp', 'Enter']);
+    const controlKeys = new Set(['ArrowDown', 'ArrowUp', 'Enter', 'Tab']);
 
     ul.addEventListener('keydown', (e) => {
         if (!controlKeys.has(e.code)) {
@@ -91,6 +91,17 @@ function openAutocompleteListEl({
                 }
             }
                 break;
+            case 'Tab': {
+                e.preventDefault()
+                if (onSelect) {
+                    function removeIconFromName(nameWithIcon) {
+                        return nameWithIcon.replace(/.*\s/, "");
+                      }
+                      const nameWithoutIcon = removeIconFromName(completions[focused]);
+                      onSelect({val: nameWithoutIcon});
+                      closeAutocompleteListEl();
+                }
+            }
         }
     });
 
@@ -242,7 +253,7 @@ function autocomplete(el) {
 
                         const requiredSel = startSel + len;
                         const replaceTo = startSel + getSelection().length;
-                        
+
                         el.focus();
                         el.setRangeText(
                             val.substr(len)+ ' ', // ' ' whitespace after inserted @user
@@ -250,6 +261,7 @@ function autocomplete(el) {
                             replaceTo,
                             'end'
                         );
+                        autocompleting = false
                     },
                     onRestyle: (listEl) => {
                         const listPos = el.getBoundingClientRect();
@@ -323,6 +335,35 @@ function autocomplete(el) {
                 // make sure that element has correct selection
                 setTimeout(() => handleChange(), 0);
                 break;
+            case'Tab':{
+                e.preventDefault();
+                if (!autocompleting) {
+                    return;
+                }
+                focusAutocompleteList();
+
+                const len = getSelectionLength();
+                const firstChild = document.querySelector('#imaticAutocompleteWidget').firstChild;
+
+                if (firstChild) {
+                    // Remove role icon
+                    const textValue = firstChild.textContent.replace(/.*\s/, "");;
+                    const requiredSel = startSel + len;
+                    const replaceTo = startSel + getSelection().length;
+
+                    el.focus();
+                    el.setRangeText(
+                        textValue.substr(len)+ ' ', // ' ' whitespace after inserted @user
+                        requiredSel,
+                        replaceTo,
+                        'end'
+                    );
+                    closeAutocompleteListEl();
+
+                    autocompleting = false
+                }
+            }
+            break;
         }
         if (e.code === 'ArrowDown') {
             focusAutocompleteList();
