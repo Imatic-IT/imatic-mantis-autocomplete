@@ -84,10 +84,11 @@ function openAutocompleteListEl({
                 if (onSelect) {
                     function removeIconFromName(nameWithIcon) {
                         return nameWithIcon.replace(/.*\s/, "");
-                      }
-                      const nameWithoutIcon = removeIconFromName(completions[focused]);
-                      onSelect({val: nameWithoutIcon});
-                      closeAutocompleteListEl();
+                    }
+
+                    const nameWithoutIcon = removeIconFromName(completions[focused]);
+                    onSelect({val: nameWithoutIcon});
+                    closeAutocompleteListEl();
                 }
             }
                 break;
@@ -96,14 +97,21 @@ function openAutocompleteListEl({
                 if (onSelect) {
                     function removeIconFromName(nameWithIcon) {
                         return nameWithIcon.replace(/.*\s/, "");
-                      }
-                      const nameWithoutIcon = removeIconFromName(completions[focused]);
-                      onSelect({val: nameWithoutIcon});
-                      closeAutocompleteListEl();
+                    }
+
+                    const nameWithoutIcon = removeIconFromName(completions[focused]);
+                    onSelect({val: nameWithoutIcon});
+                    closeAutocompleteListEl();
                 }
             }
         }
     });
+
+    ul.addEventListener('click', (e) => {
+        var text = $(e.target).text();
+        onSelect({val: text});
+        closeAutocompleteListEl();
+    })
 
     ul.addEventListener('focus', (e) => {
         const firstLi = ul.querySelector('li');
@@ -125,6 +133,12 @@ function openAutocompleteListEl({
 
     const scContainer = input.closest('.table-responsive');
 
+    var textArea = document.getElementById('bugnote_text')
+
+    textArea.addEventListener('input', restyle);
+    textArea.addEventListener('click', restyle);
+    textArea.addEventListener('resize', restyle);
+
     window.addEventListener('scroll', restyle);
     window.addEventListener('resize', restyle);
     input.addEventListener('scroll', restyle);
@@ -135,6 +149,11 @@ function openAutocompleteListEl({
     window.addEventListener('focusin', closeIfOutsideTarget);
 
     destroyListFn = () => {
+
+        textArea.removeEventListener('input', restyle);
+        textArea.removeEventListener('click', restyle);
+        textArea.removeEventListener('resize', restyle);
+
         window.removeEventListener('scroll', restyle);
         window.removeEventListener('resize', restyle);
         input.removeEventListener('scroll', restyle);
@@ -256,7 +275,7 @@ function autocomplete(el) {
 
                         el.focus();
                         el.setRangeText(
-                            val.substr(len)+ ' ', // ' ' whitespace after inserted @user
+                            val.substr(len) + ' ', // ' ' whitespace after inserted @user
                             requiredSel,
                             replaceTo,
                             'end'
@@ -266,6 +285,7 @@ function autocomplete(el) {
                     onRestyle: (listEl) => {
                         const listPos = el.getBoundingClientRect();
                         const elStyles = getComputedStyle(el);
+                        let widgetId = document.getElementById('imaticAutocompleteWidget')
 
                         const textHeight = u.textSize(
                             elStyles,
@@ -277,10 +297,19 @@ function autocomplete(el) {
                         listEl.style.top =
                             listPos.y + textHeight + 5 - el.scrollTop + 'px';
                         listEl.style.width = el.clientWidth + 'px';
+
+                        if (widgetId) {
+                            if (textHeight) {
+                                const widgetPosition = widgetId.getBoundingClientRect();
+                                const posDif = listPos.y - widgetPosition.y + textHeight
+                                if (posDif > -5 ) {
+                                    listEl.style.top = listPos.y + textHeight + 10 - el.scrollTop + posDif + 'px';
+                                }
+                            }
+                        }
                     },
                 });
             };
-
             if (cache.has(resultCache, v)) {
                 return receiveCompletions(cache.get(resultCache, v));
             }
@@ -308,7 +337,7 @@ function autocomplete(el) {
 
                     if (user.replace(/.*\s/, "").indexOf(v) === 0) {
                         return user.includes(v);
-                      }
+                    }
                 });
 
                 resultCache = cache.set(resultCache, v, filteredUsers);
@@ -335,7 +364,7 @@ function autocomplete(el) {
                 // make sure that element has correct selection
                 setTimeout(() => handleChange(), 0);
                 break;
-            case'Tab':{
+            case'Tab': {
                 e.preventDefault();
                 if (!autocompleting) {
                     return;
@@ -347,13 +376,14 @@ function autocomplete(el) {
 
                 if (firstChild) {
                     // Remove role icon
-                    const textValue = firstChild.textContent.replace(/.*\s/, "");;
+                    const textValue = firstChild.textContent.replace(/.*\s/, "");
+                    ;
                     const requiredSel = startSel + len;
                     const replaceTo = startSel + getSelection().length;
 
                     el.focus();
                     el.setRangeText(
-                        textValue.substr(len)+ ' ', // ' ' whitespace after inserted @user
+                        textValue.substr(len) + ' ', // ' ' whitespace after inserted @user
                         requiredSel,
                         replaceTo,
                         'end'
@@ -363,7 +393,7 @@ function autocomplete(el) {
                     autocompleting = false
                 }
             }
-            break;
+                break;
         }
         if (e.code === 'ArrowDown') {
             focusAutocompleteList();
