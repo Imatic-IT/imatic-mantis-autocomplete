@@ -1,12 +1,12 @@
 {
     "scripts": {
         "build": "webpack --mode production",
-        "build:watch": "webpack -p --devtool inline-sourcemap --watch"
+        "build:watch": "webpack --mode development --devtool inline-source-map --watch"
     },
     "devDependencies": {
         "css-combine": "^1.0.0",
         "webpack": "^5.99.7",
-        "webpack-cli": "^6.0.1"
+        "webpack-cli": "^5.1.4"
     },
     "dependencies": {}
 }
