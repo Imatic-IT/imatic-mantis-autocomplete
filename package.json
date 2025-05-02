@@ -4,7 +4,6 @@
         "build:watch": "webpack --mode development --devtool inline-source-map --watch"
     },
     "devDependencies": {
-        "css-combine": "^1.0.0",
         "webpack": "^5.99.7",
         "webpack-cli": "^5.1.4"
     },
